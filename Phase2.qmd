@@ -5,4 +5,34 @@ format: html
 editor: visual
 ---
 
-## 
+
+# GitHub
+
+Emplacement du projet : <https://github.com/mangerunecuillerebleue-afk/gender-health-research-gap>
+
+# Sources des données
+
+Nous avons choisi comme sources l'OMS (Organisation Mondiale de la Santé) et les NIH (instituts nationaux de la santé ).
+
+## Source 1 : OMS, Global Health Estimates, DALY (Disability-Adjusted Life Year)
+
+Nous avons recuperé 7 base de données qui ne sont pas telechargeables par un lien direct. Pour reproduire notre sélection :
+
+1. Ouvrir la page ci-dessous
+
+<https://www.who.int/data/gho/data/themes/mortality-and-global-health-estimates/global-health-estimates-leading-causes-of-dalys>
+
+2. Dans la partie « BY COUNTRIES AND AREAS », ligne « DALY estimates, 2000-2023 », télécharger les fichiers des années 2010, 2015, 2019, 2020, 2021, 2022, 2023 (un fichier Excel par année). Nous n'avons pas pris en compte celui de 2000 car notre seconde source ne debute qu'en 2008.
+
+
+3. Dans chaque fichier, ouvrir la feuille " All ages" et l'enregistrer en CSV dans le dossier `data/`. La base de données donnes accès à une analyse par tranches d'ags mais notre question ne s'y interesse pas. 
+
+## Source 2 : NIH RePORT, Research, Condition, and Disease Categorization (RCDC)
+
+Pour reproduire notre sélection :
+
+1. Ouvrir la page ci-dessous.
+<https://report.nih.gov/funding/categorical-spending>
+
+2. Cliquer sur "export" puis "Export Data as Excel". 
+3. Enregistrer le fichier en CSV dans le dossier `data/`.
