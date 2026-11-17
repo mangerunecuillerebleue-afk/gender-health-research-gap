@@ -12,27 +12,43 @@ Emplacement du projet : <https://github.com/mangerunecuillerebleue-afk/gender-he
 
 # Sources des données
 
-Nous avons choisi comme sources l'OMS (Organisation Mondiale de la Santé) et les NIH (instituts nationaux de la santé ).
+Notre projet étudie les inégalités de financement de la recherche médicale aux États-Unis entre les femmes et les hommes, en mettant en relation le financement consacré aux différentes maladies et leur poids sanitaire respectif. Pour cela, nous mobilisons deux sources complémentaires : les Global Health Estimates de l'Organisation mondiale de la santé (OMS), qui nous permettent de mesurer le poids des maladies selon le sexe, et les données Research, Condition, and Disease Categorization (RCDC) des National Institutes of Health (NIH), qui nous renseignent sur les montants consacrés à ces maladies.
 
-## Source 1 : OMS, Global Health Estimates, DALY (Disability-Adjusted Life Year)
+Le rapprochement de ces deux sources doit permettre d'examiner si les maladies touchant davantage les femmes bénéficient d'un financement proportionnel à leur poids sanitaire. Les deux bases présentent toutefois certaines limites. Les données du NIH concernent uniquement les États-Unis, tandis que les estimations sanitaires de l'OMS sont disponibles à l'échelle internationale. Par ailleurs, les années fiscales utilisées par le NIH (d'octobre à septembre) ne coïncident pas exactement avec les années civiles de l'OMS. Enfin, les catégories de maladies ne sont pas toujours désignées de la même manière dans les deux bases, ce qui nécessitera un travail de correspondance et d'harmonisation avant leur rapprochement.
 
-Nous avons recuperé 7 base de données qui ne sont pas telechargeables par un lien direct. Pour reproduire notre sélection :
+## SOURCE 1 : OMS, Global Health Estimates
 
-1. Ouvrir la page ci-dessous
+Lien vers la source : <https://www.who.int/data/gho/data/themes/mortality-and-global-health-estimates/global-health-estimates-leading-causes-of-dalys>
 
-<https://www.who.int/data/gho/data/themes/mortality-and-global-health-estimates/global-health-estimates-leading-causes-of-dalys>
+Les GHE fournissent des estimations du poids des maladies et des causes de décès pour 185 pays, selon différentes dimensions : la cause, l'âge, le sexe et l'année. L'indicateur retenu dans notre projet est le DALY (Disability-Adjusted Life Year), qui mesure le nombre d'années de vie en bonne santé perdues en raison d'une maladie ou d'un décès prématuré. Il correspond à la somme des années de vie perdues à la suite d'un décès prématuré ( Years of Life Lost, YLL) et des années vécues avec une incapacité ( Years Lived with Disability, YLD). Un DALY élevé traduit ainsi un poids sanitaire important pour une maladie donnée.
 
-2. Dans la partie « BY COUNTRIES AND AREAS », ligne « DALY estimates, 2000-2023 », télécharger les fichiers des années 2010, 2015, 2019, 2020, 2021, 2022, 2023 (un fichier Excel par année). Nous n'avons pas pris en compte celui de 2000 car notre seconde source ne debute qu'en 2008.
+Ces données ne correspondent pas à des observations directement recueillies auprès de l'ensemble des populations, mais à des estimations élaborées par l'OMS à partir de sources diverses, notamment les registres de décès, les enquêtes de santé, les programmes sanitaires et les données démographiques. Ces informations sont ensuite complétées par des méthodes statistiques et des modèles de modélisation, permettant notamment de produire des estimations comparables entre pays, y compris lorsque leurs systèmes statistiques présentent des lacunes. Toutefois, la fiabilité de ces estimations dépend de la disponibilité et de la qualité des données nationales, qui peuvent varier considérablement d'un pays à l'autre. L'OMS fournit ainsi des indications sur la qualité des données ( codes couleurs), qu'il convient de prendre en compte dans l'interprétation des résultats. Les valeurs publiées doivent donc être considérées comme des estimations du poids sanitaire des maladies, et non comme des mesures parfaitement exhaustives. Cette incertitude doit également être prise en compte lors des comparaisons entre les sexes et entre les années.
 
+Les fichiers nécessaires à notre analyse ne sont pas accessibles par des liens de téléchargement directs et individualisés. Pour reproduire notre sélection, il convient de suivre les étapes suivantes :
 
-3. Dans chaque fichier, ouvrir la feuille " All ages" et l'enregistrer en CSV dans le dossier `data/`. La base de données donnes accès à une analyse par tranches d'ags mais notre question ne s'y interesse pas. 
+1. Accéder à la page <https://www.who.int/data/gho/data/themes/mortality-and-global-health-estimates/global-health-estimates-leading-causes-of-dalys>
 
-## Source 2 : NIH RePORT, Research, Condition, and Disease Categorization (RCDC)
+2. Dans la rubrique « BY COUNTRIES AND AREAS », repérer la ligne « DALY estimates, 2000–2023 » et télécharger les fichiers Excel correspondant aux années 2010, 2015, 2019, 2020, 2021, 2022 et 2023.
 
-Pour reproduire notre sélection :
+3. Dans chaque fichier, sélectionner la feuille « All ages », puis l'enregistrer au format CSV dans le dossier `data/` du projet.
 
-1. Ouvrir la page ci-dessous.
-<https://report.nih.gov/funding/categorical-spending>
+La feuille « All ages » a été privilégiée car notre analyse porte sur les différences entre les sexes et non sur les disparités entre tranches d'âge. Enfin, nous n'avons pas retenu le fichier de 2000, car notre seconde source, les données du NIH, ne couvre les dépenses de recherche qu'à partir de 2008.
 
-2. Cliquer sur "export" puis "Export Data as Excel". 
-3. Enregistrer le fichier en CSV dans le dossier `data/`.
+## SOURCE 2 : NIH, RCDC (Research, Condition, and Disease Categorization)
+
+Lien vers la source : <https://report.nih.gov/funding/categorical-spending>
+
+Les National Institutes of Health constituent la principale agence publique américaine de financement de la recherche biomédicale et en santé. À travers son tableau RCDC, le NIH publie chaque année les montants estimés consacrés à plus de 300 catégories de maladies et de domaines de recherche, parmi lesquels figurent notamment le cancer du sein, le diabète ou encore la santé mentale. Les montants sont exprimés en dollars et disponibles par année fiscale depuis 2008.
+
+La classification des projets repose sur un système informatisé qui analyse le contenu de leurs descriptions afin de les associer aux catégories de recherche pertinentes. Toutefois, cette méthode présente une particularité importante, un même projet peut être rattaché à plusieurs catégories. Celles-ci ne sont donc pas mutuellement exclusives, ce qui implique que la somme des financements associés à l'ensemble des catégories peut dépasser le budget total du NIH. Ce chevauchement peut entraîner un double comptage de certains projets et ainsi conduire à une surestimation des montants consacrés à certaines maladies. Il conviendra donc d'adopter une approche prudente dans les comparaisons entre catégories, notamment lors du calcul des ratios entre financement et poids sanitaire, sans interpréter leur somme comme une mesure du budget total investi. Par ailleurs, les catégories recensées ne correspondent pas toutes à des maladies, certaines désignent des domaines scientifiques ou des thématiques transversales, comme la génétique. Ces catégories devront être écartées ou traitées séparément afin de ne retenir que celles qui sont pertinentes au regard de notre problématique.
+
+Contrairement aux fichiers de l'OMS, les données du NIH peuvent être récupérées directement depuis l'interface de consultation. Pour reproduire notre extraction :
+
+1. Accéder à la page <https://report.nih.gov/funding/categorical-spending>
+
+2. Cliquer sur « Export », puis sélectionner « Export Data as Excel ».
+
+3. Enregistrer le fichier obtenu au format CSV dans le dossier `data/` du projet.
+
+Nous avons conservé l'ensemble du fichier téléchargé, sans appliquer de filtre préalable, afin de disposer de toutes les catégories disponibles et de pouvoir effectuer ensuite une sélection cohérente avec notre problématique de recherche.
+
