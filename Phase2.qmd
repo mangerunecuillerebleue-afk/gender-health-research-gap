@@ -10,6 +10,16 @@ editor: visual
 
 Emplacement du projet : <https://github.com/mangerunecuillerebleue-afk/gender-health-research-gap>
 
+# Question de recherche
+
+**Aux États-Unis, les maladies qui touchent davantage les femmes sont-elles moins financées par la recherche, à gravité égale, et comment ces disparités évoluent-elles dans le temps ?**
+
+La recherche médicale a longtemps été pensée autour des hommes. Pendant des décennies, les essais cliniques ont surtout inclus des participants masculins, et les connaissances sur les maladies féminines, ou sur les différences de symptômes entre les sexes, en ont souffert. Nous souhaitons vérifier si cet héritage se retrouve dans la répartition de l'argent public consacré à la recherche. Plus précisément, nous cherchons à savoir si le financement d'une maladie dépend uniquement de son poids sanitaire, ou aussi de la part de ce poids supportée par les femmes. 
+
+La gravité d'une maladie est mesurée par le nombre d'années de vie en bonne santé perdues à cause d'elle (DALY), un indicateur qui tient compte à la fois de la mortalité et de l'incapacité et évite ainsi de sous-estimer les maladies peu mortelles mais très invalidantes. Pour chaque maladie et chaque année, nous calculerons le financement par DALY, puis nous étudierons son lien avec la part des DALYs concernant les femmes. Si les maladies à forte part féminine reçoivent moins de financement par DALY que les autres, cela suggérera une sous-recherche liée au sexe.
+
+Nous analyserons ensuite l'évolution de ce lien dans le temps, et nous comparerons les maladies qui touchent surtout les femmes à celles qui touchent surtout les hommes. Le nombre de maladies étudiées dépendra de la qualité de l'appariement entre nos deux sources, qui ne partagent aucune clé commune. Le poids sanitaire n'est pas le seul critère légitime de répartition des fonds, car le coût de la recherche et les perspectives scientifiques varient aussi selon les maladies. Nous décrirons donc des écarts de financement, sans prétendre prouver à eux seuls l'existence d'une discrimination.
+
 # Sources des données
 
 Notre projet étudie les inégalités de financement de la recherche médicale aux États-Unis entre les femmes et les hommes, en mettant en relation le financement consacré aux différentes maladies et leur poids sanitaire respectif. Pour cela, nous mobilisons deux sources complémentaires : les Global Health Estimates de l'Organisation mondiale de la santé (OMS), qui nous permettent de mesurer le poids des maladies selon le sexe, et les données Research, Condition, and Disease Categorization (RCDC) des National Institutes of Health (NIH), qui nous renseignent sur les montants consacrés à ces maladies.
