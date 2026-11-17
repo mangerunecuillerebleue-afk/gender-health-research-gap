@@ -1,2 +1,2 @@
 # gender-health-research-gap
-Comparing medical research funding and disease burden among women and men in the US. 
+Inégalités de financement de la recherche médicale aux États-Unis selon le poids sanitaire des maladies et leur répartition entre les femmes et les hommes.
