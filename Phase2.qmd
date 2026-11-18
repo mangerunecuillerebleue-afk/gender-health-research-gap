@@ -57,6 +57,10 @@ Contrairement aux fichiers de l'OMS, les données du NIH peuvent être récupér
 
 # Préparation et nettoyage des données
 
+### Utilisation de l'intelligence artificielle
+
+Nous avons utilisé **ChatGPT de OpenAI (le tout récent modèle GPT-6)**, comme outil d'assistance uniquement pour générer, structurer et corriger le code R de nettoyage des données NIH et OMS. Le code a ensuite été exécuté dans RStudio et les résultats obtenus ont été vérifiés.
+
 ## 1. Données NIH
 
 ```{r}
@@ -192,15 +196,11 @@ write.csv(
 
 ```
 
-### Utilisation de l'intelligence artificielle
-
-Nous avons utilisé **ChatGPT de OpenAI (le tout récent modèle GPT-6)**, comme outil d'assistance uniquement pour générer, structurer et corriger le code R de nettoyage des données NIH. Le code a ensuite été exécuté dans RStudio et les résultats obtenus ont été vérifiés.
-
 ### Nettoyage des données NIH
 
 **Importation et sélection des données**
 
-Nous avons importé le fichier raw Excel `nih_funding_2008_2025.xlsx` à l'aide de la fonction `read_excel()`, en ignorant les deux premières lignes de présentation. Nous avons ensuite supprimé les notes situées à la fin du tableau et conservé les sept années étudiées : **2010, 2015, 2019, 2020, 2021, 2022 et 2023**, afin d'avoir les mêmes années que ceux présents dans les données OMS.
+Nous avons importé le fichier raw Excel `nih_funding_2008_2025.xlsx` à l'aide de la fonction `read_excel()`, en ignorant les 2 premières lignes de présentation. Nous avons ensuite supprimé les notes situées à la fin du tableau et conservé les sept années étudiées : **2010, 2015, 2019, 2020, 2021, 2022 et 2023**, afin d'avoir les mêmes années que ceux présents dans les données OMS.
 
 **Restructuration des données**
 
@@ -214,9 +214,9 @@ Le fichier NIH contient deux symboles particuliers :
 
 \- `*` : indique un financement inférieur au seuil de publication de 500 000 dollars.
 
-Ces symboles ont été convertis en `NA` dans la variable numérique `funding_millions`, afin de ne pas les confondre avec des financements nuls.
+Ces symboles ont été convertis en `NA` dans la variable numérique `funding_millions`, pour ne pas les confondre avec des financements nuls.
 
-Il y avait également des variables qui contenait des valeurs supplémentaires entre parenthèses, ceux-ci ont été retirées de la variable numérique pour conserver le montant principal.
+Il y avait également des cellules qui contenait des valeurs supplémentaires entre parenthèses, ceux-ci ont été retirées de la variable numérique pour conserver le montant principal.
 
 **Création de la base nettoyée**
 
@@ -372,17 +372,13 @@ write.csv(
 
 ```
 
-### Utilisation de l'intelligence artificielle
-
-Nous avons utilisé **ChatGPT de OpenAI (le tout récent modèle GPT-6)**, comme outil d'assistance uniquement pour générer, structurer et corriger le code R de nettoyage des données OMS. Le code a ensuite été exécuté dans RStudio et les résultats obtenus ont été vérifiés.
-
 ### Nettoyage des données OMS
 
 **Importation et sélection des données**
 
 Nous avons importé les sept fichiers Excel des *Global Health Estimates* (GHE) de l'Organisation mondiale de la santé (OMS), correspondant aux années 2010, 2015, 2019, 2020, 2021, 2022 et 2023.
 
-Pour chaque fichier, nous avons utilisé la fonction `read_excel()` afin d'extraire les données de la feuille `All ages`, qui regroupe toutes les classes d'âge. Nous avons sélectionné uniquement les données des États-Unis, en identifiant automatiquement la colonne correspondant au code pays `USA`.
+Pour chaque fichier, nous avons utilisé la fonction `read_excel()` afin d'extraire les données de la feuille `All ages`, qui regroupe toutes les classes d'âge, comme précisé précédemment. Nous avons sélectionné uniquement les données des États-Unis, en identifiant automatiquement la colonne correspondant au code pays `USA`.
 
 **Nettoyage et harmonisation des données**
 
@@ -398,7 +394,7 @@ Chaque observation correspond ainsi à une cause de maladie, une année et une c
 
 **Conversion des DALYs**
 
-Les données originales de l'OMS sont exprimées en milliers de DALYs (*Disability-Adjusted Life Years*), c'est-à-dire en milliers d'années de vie en bonne santé perdues.Nous avons multiplié ces valeurs par 1 000 afin d'obtenir les DALYs en unités individuelles, puis converti les données en valeurs numériques.
+Les données originales de l'OMS sont exprimées en milliers de DALYs (*Disability-Adjusted Life Years*), c'est-à-dire en milliers d'années de vie en bonne santé perdues. Nous avons multiplié ces valeurs par 1 000 afin d'obtenir les DALYs en unités individuelles, puis on a converti les données en valeurs numériques.
 
 **Création de la base nettoyée**
 
@@ -425,4 +421,212 @@ Nous avons effectué plusieurs contrôles afin de vérifier les dimensions de la
 | DALYs manquants              | `{r} sum(is.na(who_clean$dalys))`           |
 | Doublons cause–année–sexe    | `{r} nrow(who_duplicates)`                  |
 
+## 3. Correspondance entre les données NIH et OMS
+
+Cette partie est plus compliquée, car les noms des maladies ne sont pas toujours les mêmes dans les deux bases. Il faut donc trouver quelles maladies correspondent entre les données NIH et OMS.
+
+On va faire cela en 3 étapes.
+
+### (i) correspondances automatiques
+Nous allons trouver les maladies avec le même nom dans les deux bases, même avec des majuscules différentes ou des numéros de notes à la fin des noms NIH.
+```{r}
+library(dplyr)
+library(tidyr)
+
+# 1. Récupérer les noms des deux bases
+nih_names <- nih_clean |>
+  distinct(disease)
+
+who_names <- who_clean |>
+  distinct(ghe_code, ghe_cause)
+
+
+# 2. Fonction pour comparer les noms
+normaliser <- function(x, notes_nih = FALSE) {
+
+  x <- iconv(x, to = "ASCII//TRANSLIT")
+
+  if (notes_nih) {
+    x <- gsub(
+      "[[:space:]]+[0-9]+([[:space:]]*,[[:space:]]*[0-9]+)*$",
+      "",
+      x
+    )
+  }
+
+  x <- tolower(x)
+  x <- gsub("&", " and ", x, fixed = TRUE)
+  x <- gsub("[^a-z0-9]+", " ", x)
+
+  trimws(gsub("[[:space:]]+", " ", x))
+}
+
+
+# 3. Trouver les noms identiques
+matches_auto <- nih_names |>
+  mutate(cle = normaliser(disease, notes_nih = TRUE)) |>
+  inner_join(
+    who_names |>
+      mutate(cle = normaliser(ghe_cause)),
+    by = "cle"
+  ) |>
+  transmute(
+    disease_nih = disease,
+    ghe_code
+  ) |>
+  distinct()
+
+```
+
+### (ii) correspondances manuelles
+Nous allons ajouter les maladies qui portent des noms différents, en vérifiant qu'elles correspondent réellement.
+
+```{r}
+# 1. Ajouter les correspondances manuelles
+matches_manual <- tribble(
+  ~disease_nih, ~ghe_code,
+
+  "Attention Deficit Hyperactivity Disorder (ADHD)", "911",
+  "Autism", "900",
+  "Cervical Cancer", "710",
+  "Colorectal Cancer", "650",
+  "Congenital Heart Disease", "1440",
+  "Diabetes 5", "800",
+  "Digestive Diseases - (Peptic Ulcer)", "1220",
+  "Esophageal Cancer", "630",
+  "Heart Disease - Coronary Heart Disease", "1130",
+  "Hodgkin's Disease", "761",
+  "Ovarian Cancer", "730",
+  "Pancreatic Cancer", "670",
+  "Parkinson's Disease", "960",
+  "Skin Cancer", "690",
+
+  "Alcoholism, Alcohol Use and Health 16", "860",
+  "Alzheimer's Disease including Alzheimer's Disease Related Dementias (AD/ADRD) 1", "950",
+  "Back Pain", "1380",
+  "Brain Cancer", "751",
+  "Cancer 16", "610",
+  "Cardiovascular", "1100",
+  "Chronic Liver Disease and Cirrhosis", "1230",
+  "Cocaine", "872",
+  "Congenital Structural Anomalies", "1400",
+  "Cooley's Anemia", "811",
+  "Dental, Oral, and Craniofacial Disease 16", "1470",
+  "Depression", "830",
+  "Digestive Diseases - (Gallbladder)", "1246",
+  "Drug Abuse (NIDA only) 6, 16", "870",
+  "Hearing Loss", "1080",
+  "Hepatitis - A", "186",
+  "Kidney Disease", "1270",
+  "Lung Cancer", "680",
+  "Lymphoma", "760",
+  "Maternal Morbidity and Mortality", "420",
+  "Methamphetamine", "873",
+  "Opioid Misuse and Addiction 10, 16", "871",
+  "Perinatal Period - Conditions Originating in Perinatal Period", "490",
+  "Physical Injury - Accidents and Adverse Effects", "1520",
+  "Pneumonia", "390",
+  "Preterm, Low Birth Weight and Health of the Newborn", "500",
+  "Sexually Transmitted Infections", "40",
+  "Sickle Cell Disease", "812",
+  "Spina Bifida", "1410",
+  "Suicide", "1610",
+  "Uterine Cancer", "720",
+  "Coronaviruses 4", "395",
+  "Urologic Diseases", "1260"
+)
+
+
+# 2. Regrouper les correspondances
+mapping <- bind_rows(
+  matches_auto,
+  matches_manual
+) |>
+  distinct(disease_nih, ghe_code) |>
+  left_join(who_names, by = "ghe_code") |>
+  arrange(disease_nih)
+
+
+# 3. Vérifier les correspondances
+stopifnot(
+  !any(is.na(mapping$ghe_cause)),
+  nrow(mapping) == n_distinct(mapping$disease_nih),
+  nrow(mapping) == n_distinct(mapping$ghe_code)
+)
+```
+
+### (iii) La jointure
+Enfin, nous réalisons la jointure entre les deux sources et créer le fichier final .csv qui rassemble les deux bases.
+
+```{r}
+# 1. Mettre les DALYs par sexe en colonnes
+who_wide <- who_clean |>
+  select(year, ghe_code, sex, dalys) |>
+  pivot_wider(
+    names_from = sex,
+    values_from = dalys
+  )
+
+
+# 2. Faire la jointure NIH - OMS
+data_joined <- mapping |>
+  inner_join(
+    nih_clean,
+    by = c("disease_nih" = "disease")
+  ) |>
+  inner_join(
+    who_wide,
+    by = c("ghe_code", "year")
+  )
+
+
+# 3. Garder une seule colonne de maladie
+# On utilise le nom officiel OMS
+
+data_joined <- data_joined |>
+  transmute(
+    disease = ghe_cause,
+    year,
+    funding_millions,
+    dalys_female = Female,
+    dalys_male = Male,
+    dalys_total = Persons,
+
+    female_share = if_else(
+      Female + Male > 0,
+      100 * Female / (Female + Male),
+      NA_real_
+    ),
+
+    funding_per_daly = if_else(
+      !is.na(funding_millions) & Persons > 0,
+      funding_millions * 1000000 / Persons,
+      NA_real_
+    )
+  ) |>
+  arrange(disease, year)
+
+
+# 4. Vérifier la jointure
+stopifnot(
+  nrow(data_joined) == nrow(mapping) * 7
+)
+
+
+# 5. Exporter le tableau de correspondance
+write.csv(
+  mapping,
+  "data/mapping_nih_who.csv",
+  row.names = FALSE
+)
+
+
+# 6. Exporter la base finale
+write.csv(
+  data_joined,
+  "data/nih_who_joined.csv",
+  row.names = FALSE,
+  na = ""
+)
+```
 
