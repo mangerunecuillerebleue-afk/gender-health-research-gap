@@ -1,10 +1,9 @@
 ---
 title: "Phase2"
-author: "Fatma Faouaz & Marie Nguyen"
+author: "Fatma Faouaz & Ngoc Tran Marie Nguyen"
 format: html
 editor: visual
 ---
-
 
 # GitHub
 
@@ -12,9 +11,9 @@ Emplacement du projet : <https://github.com/mangerunecuillerebleue-afk/gender-he
 
 # Question de recherche
 
-**Aux États-Unis, les maladies qui touchent davantage les femmes sont-elles moins financées par la recherche, à gravité égale, et comment ces disparités évoluent-elles dans le temps ?**
+**Aux États-Unis, les maladies qui touchent davantage les femmes sont-elles moins financées par la recherche, à poids sanitaire comparable,** **et comment ces disparités évoluent-elles dans le temps ?**
 
-La recherche médicale a longtemps été pensée autour des hommes. Pendant des décennies, les essais cliniques ont surtout inclus des participants masculins, et les connaissances sur les maladies féminines, ou sur les différences de symptômes entre les sexes, en ont souffert. Nous souhaitons vérifier si cet héritage se retrouve dans la répartition de l'argent public consacré à la recherche. Plus précisément, nous cherchons à savoir si le financement d'une maladie dépend uniquement de son poids sanitaire, ou aussi de la part de ce poids supportée par les femmes. 
+La recherche médicale a longtemps été pensée autour des hommes. Pendant des décennies, les essais cliniques ont surtout inclus des participants masculins, et les connaissances sur les maladies féminines, ou sur les différences de symptômes entre les sexes, en ont souffert. Nous souhaitons vérifier si cet héritage se retrouve dans la répartition de l'argent public consacré à la recherche. Plus précisément, nous cherchons à savoir si le financement d'une maladie dépend uniquement de son poids sanitaire, ou aussi de la part de ce poids supportée par les femmes.
 
 La gravité d'une maladie est mesurée par le nombre d'années de vie en bonne santé perdues à cause d'elle (DALY), un indicateur qui tient compte à la fois de la mortalité et de l'incapacité et évite ainsi de sous-estimer les maladies peu mortelles mais très invalidantes. Pour chaque maladie et chaque année, nous calculerons le financement par DALY, puis nous étudierons son lien avec la part des DALYs concernant les femmes. Si les maladies à forte part féminine reçoivent moins de financement par DALY que les autres, cela suggérera une sous-recherche liée au sexe.
 
@@ -36,13 +35,11 @@ Ces données ne correspondent pas à des observations directement recueillies au
 
 Les fichiers nécessaires à notre analyse ne sont pas accessibles par des liens de téléchargement directs et individualisés. Pour reproduire notre sélection, il convient de suivre les étapes suivantes :
 
-1. Accéder à la page <https://www.who.int/data/gho/data/themes/mortality-and-global-health-estimates/global-health-estimates-leading-causes-of-dalys>
+1.  Accéder à la page <https://www.who.int/data/gho/data/themes/mortality-and-global-health-estimates/global-health-estimates-leading-causes-of-dalys>
 
-2. Dans la rubrique « BY COUNTRIES AND AREAS », repérer la ligne « DALY estimates, 2000–2023 » et télécharger les fichiers Excel correspondant aux années 2010, 2015, 2019, 2020, 2021, 2022 et 2023.
+2.  Dans la rubrique « BY COUNTRIES AND AREAS », repérer la ligne « DALY estimates, 2000–2023 » et télécharger les fichiers Excel correspondant aux années 2010, 2015, 2019, 2020, 2021, 2022 et 2023.
 
-3. Dans chaque fichier, sélectionner la feuille « All ages », puis l'enregistrer au format CSV dans le dossier `data/` du projet.
-
-La feuille « All ages » a été privilégiée car notre analyse porte sur les différences entre les sexes et non sur les disparités entre tranches d'âge. Enfin, nous n'avons pas retenu le fichier de 2000, car notre seconde source, les données du NIH, ne couvre les dépenses de recherche qu'à partir de 2008.
+La sélection de la feuille « All ages », le nettoyage et la conversion en CSV seront effectués avec R. En effet, la feuille « All ages » est privilégiée car notre analyse porte sur les différences entre les sexes et non sur les disparités entre tranches d'âge. Enfin, nous n'avons pas retenu le fichier de 2000, car notre seconde source, les données du NIH, ne couvre les dépenses de recherche qu'à partir de 2008.
 
 ## SOURCE 2 : NIH, RCDC (Research, Condition, and Disease Categorization)
 
@@ -54,11 +51,378 @@ La classification des projets repose sur un système informatisé qui analyse le
 
 Contrairement aux fichiers de l'OMS, les données du NIH peuvent être récupérées directement depuis l'interface de consultation. Pour reproduire notre extraction :
 
-1. Accéder à la page <https://report.nih.gov/funding/categorical-spending>
+1.  Accéder à la page <https://report.nih.gov/funding/categorical-spending>
 
-2. Cliquer sur « Export », puis sélectionner « Export Data as Excel ».
+2.  Cliquer sur « Export », puis sélectionner « Export Data as Excel ». Les données seront ensuite importées, nettoyées et exportées au format CSV à l'aide de R.
 
-3. Enregistrer le fichier obtenu au format CSV dans le dossier `data/` du projet.
+# Préparation et nettoyage des données
 
-Nous avons conservé l'ensemble du fichier téléchargé, sans appliquer de filtre préalable, afin de disposer de toutes les catégories disponibles et de pouvoir effectuer ensuite une sélection cohérente avec notre problématique de recherche.
+## 1. Données NIH
+
+```{r}
+library(readxl)
+library(dplyr)
+library(tidyr)
+
+# 1. Importer le fichier Excel original du NIH
+nih_raw <- read_excel(
+  "data/nih_funding_2008_2025.xlsx",
+  skip = 2,
+  col_types = "text"
+)
+
+# Renommer la première colonne
+names(nih_raw)[1] <- "disease"
+
+
+# 2. Supprimer les notes situées après le tableau
+last_row <- which(
+  trimws(nih_raw$disease) == "Youth Violence Prevention"
+)
+
+stopifnot(length(last_row) == 1)
+
+
+# 3. Conserver les sept années étudiées
+nih_data <- nih_raw |>
+  slice(1:last_row) |>
+  select(
+    disease,
+    `2010`, `2015`, `2019`,
+    `2020`, `2021`, `2022`, `2023`
+  )
+
+
+# 4. Transformer les années en lignes
+nih_work <- nih_data |>
+  pivot_longer(
+    cols = -disease,
+    names_to = "year",
+    values_to = "funding_raw"
+  ) |>
+  mutate(
+    disease = trimws(disease),
+    year = as.integer(year),
+    funding_raw = trimws(funding_raw)
+  ) |>
+  filter(
+    !is.na(disease),
+    disease != ""
+  )
+
+
+# 5. Identifier les valeurs manquantes
+# + : catégorie nouvelle, financement non disponible
+# * : financement inférieur au seuil de publication
+
+nih_work <- nih_work |>
+  mutate(
+    funding_status = case_when(
+      funding_raw == "+" ~ "new_category_no_data",
+      funding_raw == "*" ~ "below_reporting_threshold",
+      is.na(funding_raw) | funding_raw == "" ~ "missing",
+      TRUE ~ "reported"
+    )
+  )
+
+
+# 6. Convertir les financements en nombres
+# Montants exprimés en millions de dollars
+# Exemple : "$1,019 ($995)" devient 1019
+# Les symboles + et * deviennent NA
+
+nih_work <- nih_work |>
+  mutate(
+    funding_main = sub(
+      "\\s*\\(.*$",
+      "",
+      funding_raw
+    ),
+    funding_millions = suppressWarnings(
+      as.numeric(
+        gsub("[$,]", "", funding_main)
+      )
+    )
+  ) |>
+  select(
+    disease,
+    year,
+    funding_millions,
+    funding_status,
+    funding_raw
+  ) |>
+  distinct() |>
+  arrange(disease, year)
+
+
+# 7. Vérifier les conversions numériques
+nih_errors <- nih_work |>
+  filter(
+    funding_status == "reported",
+    is.na(funding_millions)
+  )
+
+stopifnot(nrow(nih_errors) == 0)
+
+
+# 8. Vérifier l'absence de doublons
+nih_duplicates <- nih_work |>
+  count(disease, year) |>
+  filter(n > 1)
+
+stopifnot(nrow(nih_duplicates) == 0)
+
+
+# 9. Créer la base finale avec seulement 3 colonnes
+nih_clean <- nih_work |>
+  select(
+    disease,
+    year,
+    funding_millions
+  )
+
+
+# 10. Exporter la base nettoyée
+write.csv(
+  nih_clean,
+  "data/nih_clean.csv",
+  row.names = FALSE,
+  na = ""
+)
+
+```
+
+### Utilisation de l'intelligence artificielle
+
+Nous avons utilisé **ChatGPT de OpenAI (le tout récent modèle GPT-6)**, comme outil d'assistance uniquement pour générer, structurer et corriger le code R de nettoyage des données NIH. Le code a ensuite été exécuté dans RStudio et les résultats obtenus ont été vérifiés.
+
+### Nettoyage des données NIH
+
+**Importation et sélection des données**
+
+Nous avons importé le fichier raw Excel `nih_funding_2008_2025.xlsx` à l'aide de la fonction `read_excel()`, en ignorant les deux premières lignes de présentation. Nous avons ensuite supprimé les notes situées à la fin du tableau et conservé les sept années étudiées : **2010, 2015, 2019, 2020, 2021, 2022 et 2023**, afin d'avoir les mêmes années que ceux présents dans les données OMS.
+
+**Restructuration des données**
+
+Nous avons utilisé `pivot_longer()` pour transformer les années, initialement présentées en colonnes, en une seule variable `year` : chaque ligne correspond maintenant à une catégorie de financement NIH pour une année donnée. Les montants ont été convertis en valeurs numériques, exprimées en **millions de dollars américains**.
+
+**Traitement des valeurs manquantes**
+
+Le fichier NIH contient deux symboles particuliers :
+
+\- `+` : indique une nouvelle catégorie pour laquelle les données de financement ne sont pas disponibles avant sa première année de publication.
+
+\- `*` : indique un financement inférieur au seuil de publication de 500 000 dollars.
+
+Ces symboles ont été convertis en `NA` dans la variable numérique `funding_millions`, afin de ne pas les confondre avec des financements nuls.
+
+Il y avait également des variables qui contenait des valeurs supplémentaires entre parenthèses, ceux-ci ont été retirées de la variable numérique pour conserver le montant principal.
+
+**Création de la base nettoyée**
+
+Après les transformations et les contrôles, nous avons conservé uniquement les trois variables nécessaires à la suite du projet :
+
+\- `disease` : catégorie de financement NIH ;
+
+\- `year` : année ;
+
+\- `funding_millions` : financement en millions de dollars.
+
+La base nettoyée a été exportée dans le fichier `nih_clean.csv`.
+
+### Vérification du nettoyage
+
+Nous avons effectué plusieurs contrôles à l'aide de R pour vérifier les dimensions de la base, le nombre de catégories, la répartition des années, les valeurs manquantes et l'absence de doublons.
+
+|  |  |
+|---------------------------|---------------------------------------------|
+| Nombre de catégories NIH | `{r} dplyr::n_distinct(nih_clean$disease)` |
+| Nombre d'années | `{r} dplyr::n_distinct(nih_clean$year)` |
+| Nombre d'observations | `{r} nrow(nih_clean)` |
+| Financements disponibles | `{r} sum(!is.na(nih_clean$funding_millions))` |
+| Valeurs `+` | `{r} sum(nih_work$funding_status == "new_category_no_data")` |
+| Valeurs `*` | `{r} sum(nih_work$funding_status == "below_reporting_threshold")` |
+| Doublons catégorie–année | `{r} nrow(nih_duplicates)` |
+
+Les vérifications permettent également de confirmer que les financements numériques disponibles ont été correctement convertis et qu'aucune combinaison catégorie–année n'apparaît plusieurs fois dans la base.
+
+## 2. Données OMS
+
+```{r}
+
+library(readxl)
+library(dplyr)
+library(tidyr)
+
+# 1. Définir les années étudiées
+years <- c(2010, 2015, 2019, 2020, 2021, 2022, 2023)
+
+# 2. Créer une liste pour stocker les données
+who_list <- list()
+
+# 3. Importer les sept fichiers Excel
+for (yr in years) {
+
+  file <- paste0("data/who_dalys_", yr, ".xlsx")
+
+  who_raw <- read_excel(
+    file,
+    sheet = "All ages",
+    col_names = FALSE,
+    col_types = "text",
+    .name_repair = "minimal"
+  )
+
+  # 4. Repérer la colonne des États-Unis
+  country_codes <- trimws(
+    as.character(unlist(who_raw[8, ], use.names = FALSE))
+  )
+
+  usa_col <- which(country_codes == "USA")
+
+  stopifnot(length(usa_col) == 1)
+
+  # 5. Récupérer les noms des maladies
+  # Les intitulés sont répartis entre les colonnes C et G
+  # On conserve la dernière cellule non vide de chaque ligne
+
+  cause <- rep(NA_character_, nrow(who_raw))
+
+  for (j in 3:7) {
+
+    values <- trimws(as.character(who_raw[[j]]))
+
+    non_empty <- !is.na(values) & values != ""
+
+    cause[non_empty] <- values[non_empty]
+  }
+
+  # 6. Sélectionner les variables nécessaires
+  who_year <- tibble(
+    year = yr,
+    sex = trimws(as.character(who_raw[[1]])),
+    ghe_code = trimws(as.character(who_raw[[2]])),
+    ghe_cause = cause,
+    dalys_raw = trimws(as.character(who_raw[[usa_col]]))
+  )
+
+  # 7. Harmoniser les sexes et conserver les maladies
+  who_year <- who_year |>
+    mutate(
+      sex = case_when(
+        tolower(sex) %in%
+          c("persons", "both sexes") ~ "Persons",
+        tolower(sex) %in%
+          c("female", "females") ~ "Female",
+        tolower(sex) %in%
+          c("male", "males") ~ "Male",
+        TRUE ~ NA_character_
+      )
+    ) |>
+    filter(
+      sex %in% c("Persons", "Female", "Male"),
+      !is.na(ghe_code),
+      grepl("^[0-9]+$", ghe_code),
+      !is.na(ghe_cause),
+      ghe_cause != ""
+    )
+
+  # 8. Convertir les DALYs en nombres
+  # Les valeurs originales sont exprimées en milliers
+  who_year <- who_year |>
+    mutate(
+      dalys = suppressWarnings(
+        as.numeric(gsub(",", "", dalys_raw))
+      ) * 1000
+    )
+
+  # 9. Vérifier les conversions
+  who_errors <- who_year |>
+    filter(
+      !is.na(dalys_raw),
+      dalys_raw != "",
+      is.na(dalys)
+    )
+
+  stopifnot(nrow(who_errors) == 0)
+
+  # Conserver les cinq colonnes finales
+  who_list[[as.character(yr)]] <- who_year |>
+    select(year, ghe_code, ghe_cause, sex, dalys)
+}
+
+# 10. Regrouper les sept années
+who_clean <- bind_rows(who_list) |>
+  arrange(year, ghe_code, sex)
+
+# 11. Vérifier l'absence de doublons
+who_duplicates <- who_clean |>
+  count(year, ghe_code, sex) |>
+  filter(n > 1)
+
+stopifnot(nrow(who_duplicates) == 0)
+
+# 12. Exporter la base nettoyée
+write.csv(
+  who_clean,
+  "data/who_clean.csv",
+  row.names = FALSE,
+  na = ""
+)
+
+```
+
+### Utilisation de l'intelligence artificielle
+
+Nous avons utilisé **ChatGPT de OpenAI (le tout récent modèle GPT-6)**, comme outil d'assistance uniquement pour générer, structurer et corriger le code R de nettoyage des données OMS. Le code a ensuite été exécuté dans RStudio et les résultats obtenus ont été vérifiés.
+
+### Nettoyage des données OMS
+
+**Importation et sélection des données**
+
+Nous avons importé les sept fichiers Excel des *Global Health Estimates* (GHE) de l'Organisation mondiale de la santé (OMS), correspondant aux années 2010, 2015, 2019, 2020, 2021, 2022 et 2023.
+
+Pour chaque fichier, nous avons utilisé la fonction `read_excel()` afin d'extraire les données de la feuille `All ages`, qui regroupe toutes les classes d'âge. Nous avons sélectionné uniquement les données des États-Unis, en identifiant automatiquement la colonne correspondant au code pays `USA`.
+
+**Nettoyage et harmonisation des données**
+
+Les noms des causes de maladie étant répartis entre plusieurs colonnes selon leur niveau de classification, nous les avons regroupés dans une seule variable, `ghe_cause`.
+
+Nous avons ensuite conservé les observations possédant un code GHE numérique et harmonisé les catégories de sexe :
+
+- `Female` : femmes ;
+- `Male` : hommes ;
+- `Persons` : ensemble des deux sexes.
+
+Chaque observation correspond ainsi à une cause de maladie, une année et une catégorie de sexe.
+
+**Conversion des DALYs**
+
+Les données originales de l'OMS sont exprimées en milliers de DALYs (*Disability-Adjusted Life Years*), c'est-à-dire en milliers d'années de vie en bonne santé perdues.Nous avons multiplié ces valeurs par 1 000 afin d'obtenir les DALYs en unités individuelles, puis converti les données en valeurs numériques.
+
+**Création de la base nettoyée**
+
+Nous avons regroupé les sept années dans une seule base appelée `who_clean`, contenant cinq variables :
+
+- `year` : année ;
+- `ghe_code` : code de classification de la cause OMS ;
+- `ghe_cause` : nom de la cause ;
+- `sex` : catégorie de sexe ;
+- `dalys` : nombre d'années de vie en bonne santé perdues.
+
+La base nettoyée a ensuite été exportée au format CSV dans le fichier `who_clean.csv`.
+
+### Vérification du nettoyage OMS
+
+Nous avons effectué plusieurs contrôles afin de vérifier les dimensions de la base, le nombre de causes, les années disponibles, les catégories de sexe, les valeurs manquantes et l'absence de doublons.
+
+| Indicateur                   | Résultat                                    |
+|------------------------------------|------------------------------------|
+| Nombre de causes OMS         | `{r} dplyr::n_distinct(who_clean$ghe_code)` |
+| Nombre d'années              | `{r} dplyr::n_distinct(who_clean$year)`     |
+| Nombre de catégories de sexe | `{r} dplyr::n_distinct(who_clean$sex)`      |
+| Nombre d'observations        | `{r} nrow(who_clean)`                       |
+| DALYs manquants              | `{r} sum(is.na(who_clean$dalys))`           |
+| Doublons cause–année–sexe    | `{r} nrow(who_duplicates)`                  |
+
 
