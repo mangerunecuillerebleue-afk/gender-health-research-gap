@@ -685,4 +685,3 @@ Les financements par DALY présentent des écarts importants entre les maladies.
 
 Le graphique met en évidence une baisse du financement médian par DALY entre 2010 et 2015, passant d'environ 350 à 250 dollars. À partir de 2015, la médiane reste relativement stable, oscillant entre environ 250 et 300 dollars jusqu'en 2023. On observe également une dispersion importante des financements entre les différentes maladies, ce qui souligne les différences dans les montants consacrés à la recherche relativement au poids sanitaire de chaque maladie.
 
-
