@@ -17,15 +17,19 @@ Emplacement du projet : <https://github.com/mangerunecuillerebleue-afk/gender-he
 
 **Aux États-Unis, les maladies qui touchent davantage les femmes sont-elles moins financées par la recherche, à poids sanitaire comparable,** **et comment ces disparités évoluent-elles dans le temps ?**
 
-La recherche médicale a longtemps été pensée autour des hommes. Pendant des décennies, les essais cliniques ont surtout inclus des participants masculins, et les connaissances sur les maladies féminines, ou sur les différences de symptômes entre les sexes, en ont souffert. Cette sous-représentation peut avoir des conséquences sur la compréhension des maladies, leur diagnostic et le développement de traitements adaptés aux femmes. Elle soulève également la question de la répartition des ressources consacrées à la recherche médicale. Nous souhaitons donc vérifier si cet héritage se retrouve dans la répartition de l'argent public consacré à la recherche. Plus précisément, nous cherchons à savoir si le financement d'une maladie dépend uniquement de son poids sanitaire, ou aussi de la part de ce poids supportée par les femmes.
+Connaît-on réellement le corps féminin ? Malgré les progrès considérables de la médecine, de nombreuses lacunes persistent dans la compréhension de l'anatomie et de la physiologie féminine. Les différences biologiques entre les femmes et les hommes n'ont pas toujours été suffisamment étudiées, enseignées ou prises en compte dans la recherche médicale. Cette situation contribue à une connaissance encore incomplète de certains aspects de la santé des femmes, y compris de leur propre fonctionnement biologique.
 
-Pour étudier cette question, nous nous concentrons sur les États-Unis et sur les financements attribués par les National Institutes of Health (NIH), l'un des principaux organismes publics de financement de la recherche médicale dans le pays. Nous utilisons également les estimations sanitaires de l'Organisation mondiale de la santé (OMS), qui permettent de mesurer le poids des différentes maladies selon le sexe. Ces deux sources sont complémentaires : la première renseigne sur les ressources consacrées à la recherche, tandis que la seconde permet d'évaluer les conséquences des maladies sur la santé de la population. Leur combinaison permet ainsi de comparer les financements de recherche aux besoins sanitaires associés à chaque maladie.
+Un exemple frappant est celui du *rete ovarii*, une structure anatomique liée à l'ovaire, décrite dès 1870, mais progressivement absente de certaines éditions récentes des manuels d'anatomie. Longtemps considérée comme une structure vestigiale dont la fonction était inconnue, elle fait aujourd'hui l'objet d'un regain d'intérêt scientifique. Cet exemple illustre la manière dont certains aspects de l'anatomie féminine ont pu rester relativement peu étudiés pendant des décennies. Plus largement, la recherche médicale s'est historiquement construite autour du corps masculin, souvent utilisé comme modèle de référence. Cette orientation a contribué à des lacunes dans les connaissances sur la santé des femmes, mais aussi dans leur transmission à travers l'enseignement médical. Elle soulève ainsi une question plus large : les priorités de la recherche scientifique et les ressources qui lui sont consacrées reflètent-elles suffisamment les besoins de santé des femmes ?
 
-La gravité d'une maladie est mesurée par le nombre d'années de vie en bonne santé perdues à cause d'elle (DALY), un indicateur qui tient compte à la fois de la mortalité prématurée et de l'incapacité. Il permet ainsi de prendre en compte les maladies qui entraînent une forte perte de qualité de vie, même lorsqu'elles sont peu mortelles. Contrairement au seul nombre de décès, cet indicateur offre une mesure plus complète du poids sanitaire des maladies. Pour chaque maladie et chaque année, nous calculerons le financement par DALY, en rapportant les montants consacrés à la recherche au nombre total de DALYs. Nous étudierons ensuite son lien avec la part des DALYs concernant les femmes. Si les maladies à forte part féminine reçoivent moins de financement par DALY que les autres, cela pourrait suggérer une inégalité dans la répartition des ressources consacrées à la recherche.
+Notre projet cherche donc à déterminer si, aux États-Unis, les maladies qui touchent davantage les femmes reçoivent moins de financements publics pour la recherche, une fois leur poids sanitaire pris en compte. Plus précisément, nous souhaitons savoir si les financements consacrés à une maladie dépendent uniquement de ses conséquences sur la santé de la population, ou également de la proportion de ces conséquences supportée par les femmes.
 
-Les bases de données du NIH et de l'OMS ne partagent cependant aucune clé commune permettant de relier directement leurs catégories. Nous devons donc construire un tableau de correspondance entre les maladies recensées dans les deux sources. Cet appariement nécessite des choix, car certaines catégories du NIH correspondent à des domaines de recherche plutôt qu'à des maladies précises. Nous écarterons donc les catégories qui ne sont pas pertinentes pour notre problématique. Par ailleurs, les données de l'OMS seront limitées aux États-Unis afin de rendre les comparaisons cohérentes avec les financements du NIH. Les deux sources ne couvrant pas exactement les mêmes années, nous rapprocherons également les années fiscales du NIH des années calendaires de l'OMS.
+Pour étudier cette question, nous combinons deux sources de données complémentaires. La première est la base NIH RePORT, qui fournit des estimations annuelles des financements publics consacrés à différentes catégories de maladies et de domaines de recherche. La seconde est la base Global Health Estimates de l'Organisation mondiale de la santé (OMS), qui mesure le poids sanitaire des maladies selon le sexe et le pays. Nous limitons les données de l'OMS aux États-Unis afin de pouvoir les rapprocher des financements attribués par le NIH.
 
-Nous analyserons ensuite l'évolution de ce lien dans le temps et comparerons les maladies qui touchent surtout les femmes à celles qui touchent surtout les hommes. Cette dimension temporelle permettra de déterminer si les éventuels écarts observés persistent ou évoluent au fil des années. Le nombre de maladies étudiées dépendra de la qualité de l'appariement entre nos deux sources. Enfin, le poids sanitaire n'est pas le seul critère légitime de répartition des fonds : le coût des travaux de recherche, les difficultés scientifiques et les perspectives de découverte peuvent également varier selon les maladies. De plus, les catégories de financement du NIH peuvent se chevaucher, un même projet pouvant être associé à plusieurs catégories. Nous décrirons donc des écarts de financement, sans prétendre prouver à eux seuls l'existence d'une discrimination.
+La gravité des maladies est mesurée à l'aide des DALYs (*Disability-Adjusted Life Years*), qui correspondent aux années de vie en bonne santé perdues. Cet indicateur combine les années de vie perdues en raison d'une mortalité prématurée et celles vécues avec une incapacité. Il permet donc de prendre en compte les conséquences mortelles et non mortelles des maladies. Pour chaque maladie et chaque année, nous calculerons le financement par DALY, en rapportant le montant des financements du NIH au nombre total de DALYs. Nous calculerons également la part des DALYs attribuable aux femmes afin d'étudier son lien avec le financement reçu.
+
+Enfin, nous analyserons l'évolution de cette relation dans le temps et comparerons les maladies qui touchent principalement les femmes à celles qui touchent principalement les hommes. Plusieurs limites devront toutefois être prises en compte : les deux bases ne possèdent aucune clé commune, ce qui nécessite un appariement manuel des catégories ; certaines catégories du NIH peuvent se chevaucher ; et les années fiscales du NIH ne correspondent pas exactement aux années calendaires de l'OMS.
+
+Notre objectif n'est donc pas de démontrer un lien de causalité ou de prouver l'existence d'une discrimination, mais d'identifier et de décrire d'éventuelles disparités dans la répartition des financements de recherche, en tenant compte du poids sanitaire des maladies.
 
 # Sources des données
 
@@ -67,7 +71,7 @@ Contrairement aux fichiers de l'OMS, les données du NIH peuvent être récupér
 
 ### Utilisation de l'intelligence artificielle
 
-Nous avons utilisé **ChatGPT de OpenAI (le tout récent modèle GPT-6)**, comme outil d'assistance uniquement pour générer, structurer et corriger le code R de nettoyage des données NIH et OMS. Le code a ensuite été exécuté dans RStudio et les résultats obtenus ont été vérifiés.
+Nous avons utilisé **ChatGPT de OpenAI (le tout récent modèle GPT-6, version payante)** et **Claude de Anthropic (dernieere version, version gratuite)**, comme outils d'assistance uniquement pour générer, structurer et corriger le code R de nettoyage des données NIH et OMS. Nous l'avons aussi utilisé pour la jointure. Le code a ensuite été exécuté dans RStudio et les résultats obtenus ont été vérifiés.
 
 ## 1. Données NIH
 
@@ -505,7 +509,7 @@ Nous avons ensuite regroupé les correspondances automatiques et manuelles dans 
 
 Cette deuxième étape a permis d'ajouter **47 correspondances manuelles**.
 
-Cependant, certaines associations concernent des groupes de maladies assez larges, dont les définitions ne sont pas les mêmes entre les NIH et l'OMS, donc cela nous garantit pas que toutes les correspondances soient médicalement équivalentes. Cette limite devra donc être prise en compte dans la suite de notre analyse. 
+Cependant, certaines associations concernent des groupes de maladies assez larges, dont les définitions ne sont pas les mêmes entre les NIH et l'OMS, donc cela nous garantit pas que toutes les correspondances soient médicalement équivalentes. Cette limite devra donc être prise en compte dans la suite de notre analyse.
 
 
 ```{r}
@@ -676,7 +680,7 @@ write.csv(
 # Représentation graphique de la variable cible
 
 ```{r}
-library(ggplot2)
+
 #| fig-cap: "Distribution du financement par DALY selon l'année"
 #| fig-width: 8
 #| fig-height: 5
