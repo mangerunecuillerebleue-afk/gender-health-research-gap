@@ -33,9 +33,9 @@ Notre objectif n'est donc pas de démontrer un lien de causalité ou de prouver 
 
 # Sources des données
 
-Notre projet étudie les inégalités de financement de la recherche médicale aux États-Unis entre les femmes et les hommes, en mettant en relation le financement consacré aux différentes maladies et leur poids sanitaire respectif. Pour cela, nous mobilisons deux sources complémentaires : les Global Health Estimates de l'Organisation mondiale de la santé (OMS), qui nous permettent de mesurer le poids des maladies selon le sexe, et les données Research, Condition, and Disease Categorization (RCDC) des National Institutes of Health (NIH), qui nous renseignent sur les montants consacrés à ces maladies.
+Notre projet repose sur deux sources de données complémentaires : les Global Health Estimates de l'Organisation mondiale de la santé (OMS), qui fournissent des estimations du poids sanitaire des maladies selon le sexe, et les données Research, Condition, and Disease Categorization (RCDC) des National Institutes of Health (NIH), qui recensent les financements consacrés à différentes maladies et domaines de recherche.
 
-Le rapprochement de ces deux sources doit permettre d'examiner si les maladies touchant davantage les femmes bénéficient d'un financement proportionnel à leur poids sanitaire. Les deux bases présentent toutefois certaines limites. Les données du NIH concernent uniquement les États-Unis, tandis que les estimations sanitaires de l'OMS sont disponibles à l'échelle internationale. Par ailleurs, les années fiscales utilisées par le NIH (d'octobre à septembre) ne coïncident pas exactement avec les années civiles de l'OMS. Enfin, les catégories de maladies ne sont pas toujours désignées de la même manière dans les deux bases, ce qui nécessitera un travail de correspondance et d'harmonisation avant leur rapprochement.
+Le rapprochement de ces deux bases nécessite plusieurs précautions méthodologiques. Les catégories de maladies ne sont pas toujours désignées de la même manière, ce qui impose de construire un tableau de correspondance. De plus, les années fiscales du NIH ne coïncident pas exactement avec les années civiles de l'OMS. Enfin, les deux sources ne couvrent pas exactement le même périmètre géographique, ce qui justifie de limiter les données sanitaires de l'OMS aux États-Unis.
 
 ## SOURCE 1 : OMS, Global Health Estimates
 
