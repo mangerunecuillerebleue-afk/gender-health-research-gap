@@ -639,3 +639,30 @@ write.csv(
   na = ""
 )
 ```
+
+# Représentation graphique de la variable cible
+
+```{r}
+#| fig-cap: "Distribution du financement par DALY selon l'année"
+#| fig-width: 8
+#| fig-height: 5
+
+library(ggplot2)
+
+plot_data <- data_joined |>
+  filter(!is.na(funding_per_daly)) |>
+  mutate(year = factor(year))
+
+ggplot(plot_data, aes(x = year, y = funding_per_daly)) +
+  geom_boxplot() +
+  scale_y_log10() +
+  labs(
+    x = "Année",
+    y = "Financement NIH par DALY (dollars, échelle logarithmique)"
+  ) +
+  theme_minimal()
+```
+
+La variable cible de notre étude est le financement par DALY (`funding_per_daly`), c'est-à-dire le montant NIH consacré à une maladie rapporté à son poids sanitaire (en dollars par année de vie en bonne santé perdue). Chaque boîte résume la distribution de cette variable pour l'ensemble des maladies retenues une année donnée : la ligne centrale est la médiane, la boîte contient la moitié centrale des maladies et les points isolés sont des valeurs extrêmes.
+
+Les financements par DALY varient de plusieurs ordres de grandeur d'une maladie à l'autre. Nous utilisons donc une échelle logarithmique sur l'axe vertical, ce qui rend les écarts lisibles. Ce graphique permet de voir si le niveau de financement par DALY et sa dispersion évoluent entre 2010 et 2023.
