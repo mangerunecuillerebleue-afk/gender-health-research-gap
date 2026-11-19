@@ -3,6 +3,10 @@ title: "Phase2"
 author: "Fatma Faouaz & Ngoc Tran Marie Nguyen"
 format: html
 editor: visual
+execute:
+  echo: false
+  message: false
+  warning: false
 ---
 
 # GitHub
