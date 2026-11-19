@@ -239,7 +239,7 @@ La base nettoyée a été exportée dans le fichier `nih_clean.csv`.
 Nous avons effectué plusieurs contrôles à l'aide de R pour vérifier les dimensions de la base, le nombre de catégories, la répartition des années, les valeurs manquantes et l'absence de doublons.
 
 |  |  |
-|---------------------------|---------------------------------------------|
+|------------------------------------|------------------------------------|
 | Nombre de catégories NIH | `{r} dplyr::n_distinct(nih_clean$disease)` |
 | Nombre d'années | `{r} dplyr::n_distinct(nih_clean$year)` |
 | Nombre d'observations | `{r} nrow(nih_clean)` |
@@ -247,6 +247,7 @@ Nous avons effectué plusieurs contrôles à l'aide de R pour vérifier les dime
 | Valeurs `+` | `{r} sum(nih_work$funding_status == "new_category_no_data")` |
 | Valeurs `*` | `{r} sum(nih_work$funding_status == "below_reporting_threshold")` |
 | Doublons catégorie–année | `{r} nrow(nih_duplicates)` |
+| Nombre de colonnes | `{r} ncol(nih_clean)` |
 
 Les vérifications permettent également de confirmer que les financements numériques disponibles ont été correctement convertis et qu'aucune combinaison catégorie–année n'apparaît plusieurs fois dans la base.
 
@@ -417,13 +418,14 @@ La base nettoyée a ensuite été exportée au format CSV dans le fichier `who_c
 Nous avons effectué plusieurs contrôles afin de vérifier les dimensions de la base, le nombre de causes, les années disponibles, les catégories de sexe, les valeurs manquantes et l'absence de doublons.
 
 | Indicateur                   | Résultat                                    |
-|------------------------------------|------------------------------------|
+|-----------------------------|-------------------------------------------|
 | Nombre de causes OMS         | `{r} dplyr::n_distinct(who_clean$ghe_code)` |
 | Nombre d'années              | `{r} dplyr::n_distinct(who_clean$year)`     |
 | Nombre de catégories de sexe | `{r} dplyr::n_distinct(who_clean$sex)`      |
 | Nombre d'observations        | `{r} nrow(who_clean)`                       |
 | DALYs manquants              | `{r} sum(is.na(who_clean$dalys))`           |
 | Doublons cause–année–sexe    | `{r} nrow(who_duplicates)`                  |
+| Nombre de colonnes           | `{r} ncol(who_clean)`                       |
 
 ## 3. Correspondance entre les données NIH et OMS
 
@@ -432,7 +434,9 @@ Cette partie est plus compliquée, car les noms des maladies ne sont pas toujour
 On va faire cela en 3 étapes.
 
 ### (i) correspondances automatiques
+
 Nous allons trouver les maladies avec le même nom dans les deux bases, même avec des majuscules différentes ou des numéros de notes à la fin des noms NIH.
+
 ```{r}
 library(dplyr)
 library(tidyr)
@@ -483,6 +487,7 @@ matches_auto <- nih_names |>
 ```
 
 ### (ii) correspondances manuelles
+
 Nous allons ajouter les maladies qui portent des noms différents, en vérifiant qu'elles correspondent réellement.
 
 ```{r}
@@ -560,6 +565,7 @@ stopifnot(
 ```
 
 ### (iii) La jointure
+
 Enfin, nous réalisons la jointure entre les deux sources et créer le fichier final .csv qui rassemble les deux bases.
 
 ```{r}
@@ -633,4 +639,3 @@ write.csv(
   na = ""
 )
 ```
-
