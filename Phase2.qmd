@@ -1,6 +1,6 @@
 ---
 title: "Phase2"
-author: "Fatma Faouaz & Ngoc Tran Marie Nguyen"
+author: "Fatma Faouaz & Ngoc Tran Marie Nguyen - M1 QE"
 format: html
 editor: visual
 execute:
@@ -505,7 +505,7 @@ Nous avons ensuite regroupé les correspondances automatiques et manuelles dans 
 
 Cette deuxième étape a permis d'ajouter **47 correspondances manuelles**.
 
-Cependant, certaines associations concernent des groupes de maladies assez larges, dont les définitions ne sont pas les mêmes entre les NIH et l'OMS, donc cela nous garantit pas que toutes les correspondances soient médicalement équivalentes. Cette limite devra donc être prise en compte dans la suite de notre analyse.
+Cependant, certaines associations concernent des groupes de maladies assez larges, dont les définitions ne sont pas les mêmes entre les NIH et l'OMS, donc cela nous garantit pas que toutes les correspondances soient médicalement équivalentes. Cette limite devra donc être prise en compte dans la suite de notre analyse. 
 
 
 ```{r}
@@ -709,4 +709,5 @@ La variable cible de notre étude est le financement par DALY (`funding_per_daly
 Les financements par DALY présentent des écarts importants entre les maladies. Nous utilisons donc une échelle logarithmique sur l'axe vertical afin de rendre ces différences plus lisibles. La ligne pointillée représente la médiane globale de la période étudiée et facilite la comparaison entre les années.
 
 Le graphique met en évidence une baisse du financement médian par DALY entre 2010 et 2015, passant d'environ 350 à 250 dollars. À partir de 2015, la médiane reste relativement stable, oscillant entre environ 250 et 300 dollars jusqu'en 2023. On observe également une dispersion importante des financements entre les différentes maladies, ce qui souligne les différences dans les montants consacrés à la recherche relativement au poids sanitaire de chaque maladie.
+
 
