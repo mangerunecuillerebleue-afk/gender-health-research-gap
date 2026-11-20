@@ -51,7 +51,7 @@ Les fichiers nécessaires à notre analyse ne sont pas accessibles par des liens
 
 2.  Dans la rubrique « BY COUNTRIES AND AREAS », repérer la ligne « DALY estimates, 2000–2023 » et télécharger les fichiers Excel correspondant aux années 2010, 2015, 2019, 2020, 2021, 2022 et 2023.
 
-La sélection de la feuille « All ages », le nettoyage et la conversion en CSV seront effectués avec R. En effet, la feuille « All ages » est privilégiée car notre analyse porte sur les différences entre les sexes et non sur les disparités entre tranches d'âge. Enfin, nous n'avons pas retenu le fichier de 2000, car notre seconde source, les données du NIH, ne couvre les dépenses de recherche qu'à partir de 2008.
+La feuille « All ages » de chaque fichier a été enregistrée manuellement au format CSV (un fichier brut par année, dans le dossier `data/`). Le nettoyage est ensuite effectué avec R. La feuille « All ages » est privilégiée car notre analyse porte sur les différences entre les sexes et non sur les disparités entre tranches d'âge. Enfin, nous n'avons pas retenu le fichier de 2000, car notre seconde source, les données du NIH, ne couvre les dépenses de recherche qu'à partir de 2008.
 
 ## SOURCE 2 : NIH, RCDC (Research, Condition, and Disease Categorization)
 
@@ -65,7 +65,7 @@ Contrairement aux fichiers de l'OMS, les données du NIH peuvent être récupér
 
 1.  Accéder à la page <https://report.nih.gov/funding/categorical-spending>
 
-2.  Cliquer sur « Export », puis sélectionner « Export Data as Excel ». Les données seront ensuite importées, nettoyées et exportées au format CSV à l'aide de R.
+2.  Cliquer sur « Export », puis sélectionner « Export Data as Excel ». Enregistrer le fichier au format CSV dans le dossier `data/`. Les données seront ensuite importées et nettoyées avec R.
 
 # Préparation et nettoyage des données
 
@@ -79,12 +79,15 @@ Nous avons utilisé **ChatGPT de OpenAI (le tout récent modèle GPT-6, version 
 library(readxl)
 library(dplyr)
 library(tidyr)
+library(vroom)
 
-# 1. Importer le fichier Excel original du NIH
-nih_raw <- read_excel(
-  "data/nih_funding_2008_2025.xlsx",
+# 1. Importer le fichier CSV brut du NIH
+
+nih_raw <- vroom(
+  "data/nih_funding_2008_2025.csv",
+  delim = ";",
   skip = 2,
-  col_types = "text"
+  col_types = c(.default = "c")
 )
 
 # Renommer la première colonne
@@ -156,7 +159,7 @@ nih_work <- nih_work |>
     ),
     funding_millions = suppressWarnings(
       as.numeric(
-        gsub("[$,]", "", funding_main)
+        gsub("[^0-9.]", "", funding_main)
       )
     )
   ) |>
@@ -212,7 +215,7 @@ write.csv(
 
 **Importation et sélection des données**
 
-Nous avons importé le fichier raw Excel `nih_funding_2008_2025.xlsx` à l'aide de la fonction `read_excel()`, en ignorant les 2 premières lignes de présentation. Nous avons ensuite supprimé les notes situées à la fin du tableau et conservé les sept années étudiées : **2010, 2015, 2019, 2020, 2021, 2022 et 2023**, afin d'avoir les mêmes années que ceux présents dans les données OMS.
+Nous avons importé le fichier brut `nih_funding_2008_2025.csv` (export du NIH enregistré au format CSV) à l'aide de la fonction `vroom()`, en ignorant les 2 premières lignes de présentation. Nous avons ensuite supprimé les notes situées à la fin du tableau et conservé les sept années étudiées : **2010, 2015, 2019, 2020, 2021, 2022 et 2023**, afin d'avoir les mêmes années que celles présentes dans les données OMS.
 
 **Restructuration des données**
 
@@ -259,6 +262,8 @@ Nous avons effectué plusieurs contrôles à l'aide de R pour vérifier les dime
 
 Les vérifications permettent également de confirmer que les financements numériques disponibles ont été correctement convertis et qu'aucune combinaison catégorie–année n'apparaît plusieurs fois dans la base.
 
+
+
 ## 2. Données OMS
 
 ```{r}
@@ -273,18 +278,18 @@ years <- c(2010, 2015, 2019, 2020, 2021, 2022, 2023)
 # 2. Créer une liste pour stocker les données
 who_list <- list()
 
-# 3. Importer les sept fichiers Excel
+# 3. Importer les sept fichiers CSV
 for (yr in years) {
 
-  file <- paste0("data/who_dalys_", yr, ".xlsx")
+file <- paste0("data/who_dalys_", yr, ".csv")
 
-  who_raw <- read_excel(
-    file,
-    sheet = "All ages",
-    col_names = FALSE,
-    col_types = "text",
-    .name_repair = "minimal"
-  )
+who_raw <- vroom(
+  file,
+  delim = ";",
+  col_names = FALSE,
+  col_types = c(.default = "c"),
+  skip_empty_rows = FALSE
+)
 
   # 4. Repérer la colonne des États-Unis
   country_codes <- trimws(
@@ -345,7 +350,9 @@ for (yr in years) {
   who_year <- who_year |>
     mutate(
       dalys = suppressWarnings(
-        as.numeric(gsub(",", "", dalys_raw))
+        as.numeric(
+          gsub(",", ".", gsub("[^0-9,]", "", dalys_raw))
+        )
       ) * 1000
     )
 
@@ -389,7 +396,9 @@ write.csv(
 
 **Importation et sélection des données**
 
-Nous avons importé les sept fichiers Excel des *Global Health Estimates* (GHE) de l'Organisation mondiale de la santé (OMS), correspondant aux années 2010, 2015, 2019, 2020, 2021, 2022 et 2023.
+Nous avons importé les sept fichiers CSV bruts des *Global Health Estimates* (GHE) de l'Organisation mondiale de la santé (OMS), correspondant aux années 2010, 2015, 2019, 2020, 2021, 2022 et 2023.
+
+Chaque fichier contient la feuille `All ages`, qui regroupe toutes les classes d'âge, comme précisé précédemment, et il est lu avec la fonction `vroom()`. Nous avons sélectionné uniquement les données des États-Unis, en identifiant automatiquement la colonne correspondant au code pays `USA`.
 
 Pour chaque fichier, nous avons utilisé la fonction `read_excel()` afin d'extraire les données de la feuille `All ages`, qui regroupe toutes les classes d'âge, comme précisé précédemment. Nous avons sélectionné uniquement les données des États-Unis, en identifiant automatiquement la colonne correspondant au code pays `USA`.
 
@@ -407,7 +416,7 @@ Chaque observation correspond ainsi à une cause de maladie, une année et une c
 
 **Conversion des DALYs**
 
-Les données originales de l'OMS sont exprimées en milliers de DALYs (*Disability-Adjusted Life Years*), c'est-à-dire en milliers d'années de vie en bonne santé perdues. Nous avons multiplié ces valeurs par 1 000 afin d'obtenir les DALYs en unités individuelles, puis on a converti les données en valeurs numériques.
+Les données originales de l'OMS sont exprimées en milliers de DALYs (*Disability-Adjusted Life Years*), c'est-à-dire en milliers d'années de vie en bonne santé perdues. Dans les fichiers CSV, les nombres utilisent la virgule comme séparateur décimal et parfois une espace pour les milliers : nous avons donc retiré les espaces et remplacé la virgule par un point avant la conversion numérique. Nous avons ensuite multiplié ces valeurs par 1 000 afin d'obtenir les DALYs en unités individuelles.
 
 **Création de la base nettoyée**
 
@@ -446,8 +455,6 @@ On va faire cela en 3 étapes.
 Nous allons trouver les maladies avec le même nom dans les deux bases. Cependant, les noms ne sont pas toujours écrits exactement de la même manière; par exemple, il y a des différences de majuscules, d'accents, ou encore de ponctuation.
 
 Pour éviter que ces différences empêchent de trouver des correspondances, nous avons créé une fonction R à l'aide de l'IA permettant de normaliser les noms des maladies dans les deux bases. Cela permet notamment de supprimer les différences précisées ci-dessus. Nous avons ensuite comparé les noms obtenus pour retrouver automatiquement ceux qui étaient identiques après cette transformation.
-
-Cette première étape nous a permis d'obtenir 29 correspondances automatiques entre les données NIH et OMS.
 
 
 ```{r}
@@ -499,6 +506,8 @@ matches_auto <- nih_names |>
 
 ```
 
+Cette première étape nous a permis d'obtenir `{r} nrow(matches_auto)` correspondances automatiques entre les données NIH et OMS.
+
 ### (ii) correspondances manuelles
 
 Toutefois, l'étape (1) ne permet pas d'identifier les maladies qui portent des noms différents dans les deux sources, même lorsqu'elles correspondent à la même maladie parce que les 2 sources n'utilisent pas toujours les mêmes intitulés. Nous avons donc complété cette première étape par des correspondances manuelles.
@@ -506,11 +515,6 @@ Toutefois, l'étape (1) ne permet pas d'identifier les maladies qui portent des 
 Pour compléter cette première étape, nous avons utilisé **ChatGPT (OpenAI, GPT-6)** pour nous aider identifier des associations possibles entre les deux sources. Ces propositions ont ensuite été intégrées dans notre code R sous la forme d'une liste associant chaque catégorie NIH à un code OMS (`ghe_code`).
 
 Nous avons ensuite regroupé les correspondances automatiques et manuelles dans une seule table appelée `mapping`. Le code R vérifie que chaque association possède un intitulé OMS et qu'aucune catégorie NIH ou aucun code OMS n'apparaît plusieurs fois dans cette table.
-
-Cette deuxième étape a permis d'ajouter **47 correspondances manuelles**.
-
-Cependant, certaines associations concernent des groupes de maladies assez larges, dont les définitions ne sont pas les mêmes entre les NIH et l'OMS, donc cela nous garantit pas que toutes les correspondances soient médicalement équivalentes. Cette limite devra donc être prise en compte dans la suite de notre analyse.
-
 
 ```{r}
 # 1. Ajouter les correspondances manuelles
@@ -586,6 +590,10 @@ stopifnot(
 )
 ```
 
+Cette deuxième étape a permis d'ajouter **`{r} nrow(matches_manual)` correspondances manuelles**, soit **`{r} nrow(mapping)` correspondances** au total.
+
+Cependant, certaines associations concernent des groupes de maladies assez larges, dont les définitions ne sont pas les mêmes entre les NIH et l'OMS, donc cela nous garantit pas que toutes les correspondances soient médicalement équivalentes. Cette limite devra donc être prise en compte dans la suite de notre analyse.
+
 ### (iii) La jointure
 
 Enfin, nous réalisons la jointure entre les deux sources et créer le fichier final .csv qui rassemble les deux bases.
@@ -601,9 +609,6 @@ Nous avons ensuite créé deux nouvelles variables :
 - `female_share` : le pourcentage % de DALYs concernant les femmes par rapport au total des DALYs des femmes et des hommes.
 - `funding_per_daly` : le montant du financement NIH en dollars divisé par le nombre total de DALYs.
 
-Au final, nous avons obtenu **76 correspondances sur 7 années, soit 532 lignes**. Parmi celles-ci, 478 disposent d'un financement NIH renseigné.
-
-Enfin, nous avons enregistré le tableau des correspondances dans `mapping_nih_who.csv` et notre tableau final dans `nih_who_joined.csv`, pour pouvoir les réutiliser dans la suite du projet.
 
 ```{r}
 # 1. Mettre les DALYs par sexe en colonnes
@@ -677,6 +682,10 @@ write.csv(
 )
 ```
 
+Au final, nous avons obtenu **`{r} nrow(mapping)` correspondances sur 7 années, soit `{r} nrow(data_joined)` lignes**. Parmi celles-ci, `{r} sum(!is.na(data_joined$funding_millions))` disposent d'un financement NIH renseigné.
+
+Enfin, nous avons enregistré le tableau des correspondances dans `mapping_nih_who.csv` et notre tableau final dans `nih_who_joined.csv`, pour pouvoir les réutiliser dans la suite du projet.
+
 # Représentation graphique de la variable cible
 
 ```{r}
@@ -684,6 +693,8 @@ write.csv(
 #| fig-cap: "Distribution du financement par DALY selon l'année"
 #| fig-width: 8
 #| fig-height: 5
+
+library(ggplot2)
 
 plot_data <- data_joined |>
   filter(!is.na(funding_per_daly),
