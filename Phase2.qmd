@@ -8,12 +8,7 @@ execute:
   message: false
   warning: false
 ---
-
-# GitHub
-
 Emplacement du projet : <https://github.com/mangerunecuillerebleue-afk/gender-health-research-gap>
-
-# Question de recherche
 
 **Aux États-Unis, les maladies qui touchent davantage les femmes sont-elles moins financées par la recherche, à poids sanitaire comparable,** **et comment ces disparités évoluent-elles dans le temps ?**
 
@@ -67,11 +62,67 @@ Contrairement aux fichiers de l'OMS, les données du NIH peuvent être récupér
 
 2.  Cliquer sur « Export », puis sélectionner « Export Data as Excel ». Enregistrer le fichier au format CSV dans le dossier `data/`. Les données seront ensuite importées et nettoyées avec R.
 
+# Description des fichiers bruts
+
+```{r}
+library(vroom)
+
+# Fichier NIH brut
+nih_brut <- vroom(
+  "data/nih_funding_2008_2025.csv",
+  delim = ";",
+  col_names = FALSE,
+  col_types = c(.default = "c"),
+  skip_empty_rows = FALSE
+)
+
+nih_lignes <- sum(rowSums(!is.na(nih_brut)) > 0)
+nih_colonnes <- sum(colSums(!is.na(nih_brut)) > 0)
+
+# Fichiers OMS bruts
+annees <- c(2010, 2015, 2019, 2020, 2021, 2022, 2023)
+who_lignes <- integer(7)
+who_colonnes <- integer(7)
+
+for (i in 1:7) {
+  who_brut <- vroom(
+    paste0("data/who_dalys_", annees[i], ".csv"),
+    delim = ";",
+    col_names = FALSE,
+    col_types = c(.default = "c"),
+    skip_empty_rows = FALSE
+  )
+  who_lignes[i] <- sum(rowSums(!is.na(who_brut)) > 0)
+  who_colonnes[i] <- sum(colSums(!is.na(who_brut)) > 0)
+}
+```
+
+
+Le tableau suivant décrit le fichier brut du NIH (export du tableau RCDC), tel qu'il a été téléchargé.
+Les lignes et colonnes entièrement vides, ajoutées par l'export CSV, ne sont pas comptées.
+
+
+| Fichier brut                | Nombre de lignes     | Nombre de colonnes   |
+|-----------------------------|----------------------|----------------------|
+| `nih_funding_2008_2025.csv` | `{r} nih_lignes`     | `{r} nih_colonnes` |
+
+Le tableau suivant décrit les sept fichiers bruts de l'OMS (feuille « All ages »).
+
+| Fichier brut         | Nombre de lignes    | Nombre de colonnes    |
+|----------------------|---------------------|-----------------------|
+| `who_dalys_2010.csv` | `{r} who_lignes[1]` | `{r} who_colonnes[1]` |
+| `who_dalys_2015.csv` | `{r} who_lignes[2]` | `{r} who_colonnes[2]` |
+| `who_dalys_2019.csv` | `{r} who_lignes[3]` | `{r} who_colonnes[3]` |
+| `who_dalys_2020.csv` | `{r} who_lignes[4]` | `{r} who_colonnes[4]` |
+| `who_dalys_2021.csv` | `{r} who_lignes[5]` | `{r} who_colonnes[5]` |
+| `who_dalys_2022.csv` | `{r} who_lignes[6]` | `{r} who_colonnes[6]` |
+| `who_dalys_2023.csv` | `{r} who_lignes[7]` | `{r} who_colonnes[7]` |
+
 # Préparation et nettoyage des données
 
 ### Utilisation de l'intelligence artificielle
 
-Nous avons utilisé **ChatGPT de OpenAI (le tout récent modèle GPT-6, version payante)** et **Claude de Anthropic (dernieere version, version gratuite)**, comme outils d'assistance uniquement pour générer, structurer et corriger le code R de nettoyage des données NIH et OMS. Nous l'avons aussi utilisé pour la jointure. Le code a ensuite été exécuté dans RStudio et les résultats obtenus ont été vérifiés.
+Nous avons utilisé **ChatGPT de OpenAI (le tout récent modèle GPT-6, version payante)** et **Claude de Anthropic (derniere version, version gratuite)**, comme outils d'assistance uniquement pour générer, structurer et corriger le code R de nettoyage des données NIH et OMS. Nous l'avons aussi utilisé pour la jointure. Le code a ensuite été exécuté dans RStudio et les résultats obtenus ont été vérifiés.
 
 ## 1. Données NIH
 
@@ -262,8 +313,6 @@ Nous avons effectué plusieurs contrôles à l'aide de R pour vérifier les dime
 
 Les vérifications permettent également de confirmer que les financements numériques disponibles ont été correctement convertis et qu'aucune combinaison catégorie–année n'apparaît plusieurs fois dans la base.
 
-
-
 ## 2. Données OMS
 
 ```{r}
@@ -400,8 +449,6 @@ Nous avons importé les sept fichiers CSV bruts des *Global Health Estimates* (G
 
 Chaque fichier contient la feuille `All ages`, qui regroupe toutes les classes d'âge, comme précisé précédemment, et il est lu avec la fonction `vroom()`. Nous avons sélectionné uniquement les données des États-Unis, en identifiant automatiquement la colonne correspondant au code pays `USA`.
 
-Pour chaque fichier, nous avons utilisé la fonction `read_excel()` afin d'extraire les données de la feuille `All ages`, qui regroupe toutes les classes d'âge, comme précisé précédemment. Nous avons sélectionné uniquement les données des États-Unis, en identifiant automatiquement la colonne correspondant au code pays `USA`.
-
 **Nettoyage et harmonisation des données**
 
 Les noms des causes de maladie étant répartis entre plusieurs colonnes selon leur niveau de classification, nous les avons regroupés dans une seule variable, `ghe_cause`.
@@ -455,7 +502,6 @@ On va faire cela en 3 étapes.
 Nous allons trouver les maladies avec le même nom dans les deux bases. Cependant, les noms ne sont pas toujours écrits exactement de la même manière; par exemple, il y a des différences de majuscules, d'accents, ou encore de ponctuation.
 
 Pour éviter que ces différences empêchent de trouver des correspondances, nous avons créé une fonction R à l'aide de l'IA permettant de normaliser les noms des maladies dans les deux bases. Cela permet notamment de supprimer les différences précisées ci-dessus. Nous avons ensuite comparé les noms obtenus pour retrouver automatiquement ceux qui étaient identiques après cette transformation.
-
 
 ```{r}
 library(dplyr)
@@ -609,7 +655,6 @@ Nous avons ensuite créé deux nouvelles variables :
 - `female_share` : le pourcentage % de DALYs concernant les femmes par rapport au total des DALYs des femmes et des hommes.
 - `funding_per_daly` : le montant du financement NIH en dollars divisé par le nombre total de DALYs.
 
-
 ```{r}
 # 1. Mettre les DALYs par sexe en colonnes
 who_wide <- who_clean |>
@@ -724,5 +769,3 @@ La variable cible de notre étude est le financement par DALY (`funding_per_daly
 Les financements par DALY présentent des écarts importants entre les maladies. Nous utilisons donc une échelle logarithmique sur l'axe vertical afin de rendre ces différences plus lisibles. La ligne pointillée représente la médiane globale de la période étudiée et facilite la comparaison entre les années.
 
 Le graphique met en évidence une baisse du financement médian par DALY entre 2010 et 2015, passant d'environ 350 à 250 dollars. À partir de 2015, la médiane reste relativement stable, oscillant entre environ 250 et 300 dollars jusqu'en 2023. On observe également une dispersion importante des financements entre les différentes maladies, ce qui souligne les différences dans les montants consacrés à la recherche relativement au poids sanitaire de chaque maladie.
-
-
