@@ -62,6 +62,10 @@ Contrairement aux fichiers de l'OMS, les données du NIH peuvent être récupér
 
 2.  Cliquer sur « Export », puis sélectionner « Export Data as Excel ». Enregistrer le fichier au format CSV dans le dossier `data/`. Les données seront ensuite importées et nettoyées avec R.
 
+# Utilisation de l'intelligence artificielle
+
+Nous avons utilisé **ChatGPT de OpenAI (le tout récent modèle GPT-6, version payante)** et **Claude de Anthropic ( Claude Sonnet 5.5, version gratuite))**, comme outils d'assistance uniquement pour générer, structurer et corriger le code R de nettoyage des données NIH et OMS. Nous l'avons aussi utilisé pour la jointure. Le code a ensuite été exécuté dans RStudio et les résultats obtenus ont été vérifiés.
+
 # Description des fichiers bruts
 
 ```{r}
@@ -119,10 +123,6 @@ Le tableau suivant décrit les sept fichiers bruts de l'OMS (feuille « All ages
 | `who_dalys_2023.csv` | `{r} who_lignes[7]` | `{r} who_colonnes[7]` |
 
 # Préparation et nettoyage des données
-
-### Utilisation de l'intelligence artificielle
-
-Nous avons utilisé **ChatGPT de OpenAI (le tout récent modèle GPT-6, version payante)** et **Claude de Anthropic (derniere version, version gratuite)**, comme outils d'assistance uniquement pour générer, structurer et corriger le code R de nettoyage des données NIH et OMS. Nous l'avons aussi utilisé pour la jointure. Le code a ensuite été exécuté dans RStudio et les résultats obtenus ont été vérifiés.
 
 ## 1. Données NIH
 
@@ -731,10 +731,22 @@ Au final, nous avons obtenu **`{r} nrow(mapping)` correspondances sur 7 années,
 
 Enfin, nous avons enregistré le tableau des correspondances dans `mapping_nih_who.csv` et notre tableau final dans `nih_who_joined.csv`, pour pouvoir les réutiliser dans la suite du projet.
 
+### Description des variables du tableau final
+
+Le tableau final `nih_who_joined.csv` contient les variables suivantes :
+
+- `disease` : nom de la maladie, selon l'intitulé de l'OMS ;
+- `year` : année (2010, 2015, 2019, 2020, 2021, 2022 ou 2023) ;
+- `funding_millions` : financement du NIH consacré à la maladie cette année-là, en millions de dollars (`NA` si non disponible) ;
+- `dalys_female` : nombre de DALYs des femmes aux États-Unis pour cette maladie et cette année ;
+- `dalys_male` : nombre de DALYs des hommes aux États-Unis pour cette maladie et cette année ;
+- `dalys_total` : nombre de DALYs de l'ensemble de la population (femmes et hommes) ;
+- `female_share` : part des DALYs concernant les femmes, en pourcentage (DALYs des femmes divisés par la somme des DALYs des femmes et des hommes) ;
+- `funding_per_daly` : financement du NIH en dollars par DALY, c'est-à-dire le financement rapporté au poids sanitaire de la maladie. C'est notre variable cible.
+
 # Représentation graphique de la variable cible
 
 ```{r}
-
 #| fig-cap: "Distribution du financement par DALY selon l'année"
 #| fig-width: 8
 #| fig-height: 5
@@ -768,4 +780,4 @@ La variable cible de notre étude est le financement par DALY (`funding_per_daly
 
 Les financements par DALY présentent des écarts importants entre les maladies. Nous utilisons donc une échelle logarithmique sur l'axe vertical afin de rendre ces différences plus lisibles. La ligne pointillée représente la médiane globale de la période étudiée et facilite la comparaison entre les années.
 
-Le graphique met en évidence une baisse du financement médian par DALY entre 2010 et 2015, passant d'environ 350 à 250 dollars. À partir de 2015, la médiane reste relativement stable, oscillant entre environ 250 et 300 dollars jusqu'en 2023. On observe également une dispersion importante des financements entre les différentes maladies, ce qui souligne les différences dans les montants consacrés à la recherche relativement au poids sanitaire de chaque maladie.
+Le graphique met en évidence une baisse du financement médian par DALY entre 2010 et 2015, passant d'environ 350 à 250 dollars. À partir de 2015, la médiane reste relativement stable, oscillant entre environ 250 et 270 dollars jusqu'en 2023. On observe également une dispersion importante des financements entre les différentes maladies, ce qui souligne les différences dans les montants consacrés à la recherche relativement au poids sanitaire de chaque maladie.
